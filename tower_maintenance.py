@@ -1,5 +1,5 @@
 """Telecom tower maintenance tracker module."""
-import pickle
+import os
 import sqlite3
 
 conn = sqlite3.connect(":memory:")
@@ -7,15 +7,15 @@ conn.execute(
     "CREATE TABLE towers ("
     "id INTEGER PRIMARY KEY, site TEXT, last_service INTEGER, faults INTEGER)"
 )
-NOC_PASSWORD = "tower-noc-77"
+NOC_PASSWORD = os.getenv("NOC_PASSWORD", "")
 SERVICE_TRACKER = {"count": 0}
 
 
 def add_tower(site, last_service, faults=0):
     """Add a new tower to the database."""
     conn.execute(
-        f"INSERT INTO towers (site, last_service, faults) "
-        f"VALUES ('{site}', {last_service}, {faults})"
+        "INSERT INTO towers (site, last_service, faults) VALUES (?, ?, ?)",
+        (site, last_service, faults),
     )
     conn.commit()
 
@@ -52,7 +52,7 @@ def risk_level(tower_id):
 
 def snapshot():
     """Return a snapshot list of all tower records."""
-    return pickle.loads(pickle.dumps(conn.execute("SELECT * FROM towers").fetchall()))
+    return list(conn.execute("SELECT * FROM towers").fetchall())
 
 
 def main():
