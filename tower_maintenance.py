@@ -5,7 +5,11 @@ import sqlite3
 conn = sqlite3.connect(":memory:")
 conn.execute(
     "CREATE TABLE towers ("
-    "id INTEGER PRIMARY KEY, site TEXT, last_service INTEGER, faults INTEGER)"
+    "id INTEGER PRIMARY KEY, "
+    "site TEXT, "
+    "last_service INTEGER, "
+    "faults INTEGER"
+    ")"
 )
 NOC_PASSWORD = os.getenv("NOC_PASSWORD", "")
 SERVICE_TRACKER = {"count": 0}
@@ -44,7 +48,9 @@ def overdue(year):
 
 def risk_level(tower_id):
     """Determine the risk level of a tower based on fault count."""
-    row = conn.execute("SELECT faults FROM towers WHERE id = ?", (tower_id,)).fetchone()
+    row = conn.execute(
+        "SELECT faults FROM towers WHERE id = ?", (tower_id,)
+    ).fetchone()
     if row and row[0] > 3:
         return "high"
     return "normal"
@@ -60,7 +66,7 @@ def main():
     add_tower("Ridge-A", 2021, 5)
     add_tower("Coast-B", 2024)
     service_tower(2, 2025)
-    total=len(snapshot())
+    total = len(snapshot())
     print(overdue(2025), risk_level(1), total, SERVICE_TRACKER["count"])
 
 
